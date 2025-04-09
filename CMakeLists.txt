@@ -20,24 +20,30 @@ include(GNUInstallDirs)
 include(CondaAware)
 
 # Define build options
-option(AUTODIFF_BUILD_TESTS "Enable the compilation of the test files." ON)
-option(AUTODIFF_BUILD_PYTHON "Enable the compilation of the python bindings." ON)
+option(AUTODIFF_BUILD_TESTS "Enable the compilation of the test files." OFF)
+option(AUTODIFF_BUILD_PYTHON "Enable the compilation of the python bindings." OFF)
+option(AUTODIFF_BUILD_PYTHON_TESTS "Enable the compilation of the python tests." OFF)
 option(AUTODIFF_BUILD_EXAMPLES "Enable the compilation of the example files." ON)
-option(AUTODIFF_BUILD_DOCS "Enable the build of the documentation and website." ON)
+option(AUTODIFF_BUILD_DOCS "Enable the build of the documentation and website." OFF)
 
-# Find eigen library
+# inf the environment variable mkEigenHome is set add its content to CMAKE_PREFIX_PATH
+if(DEFINED ENV{mkEigenHome})
+	message(STATUS "Adding $ENV{mkEigenHome} to CMAKE_PREFIX_PATH")
+	list(APPEND CMAKE_PREFIX_PATH $ENV{mkEigenHome})
+endif()  # Closing the if statement
+
 find_package(Eigen3 QUIET)
 
 # Check if Eigen has been found
 if(Eigen3_FOUND)
-    message(STATUS "Eigen library has been found.")
+    message(STATUS "Autodiff tests will use Eigen library.") 
     add_definitions(-DAUTODIFF_EIGEN_FOUND)
 else()
-    message(STATUS "Eigen was not found.")
-endif()
+    message(STATUS "Autodiff tests will not use Eigen library.")
+endif()  # Closing the if statement
 
 # autodiff requires a c++17 enabled compiler
-set(CMAKE_CXX_STANDARD 17)          # ensure cmake instructs compiler to use C++17
+set(CMAKE_CXX_STANDARD 20)        # ensure cmake instructs compiler to use C++17
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # ensure the C++ standard given before is actually used
 set(CMAKE_CXX_EXTENSIONS OFF)       # avoid compile flags of the type -std=gnu++1z added by cmake
 
@@ -48,6 +54,7 @@ if(CMAKE_CUDA_COMPILER)
     if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
         set(CMAKE_CUDA_ARCHITECTURES OFF)
     endif()
+	message(STATUS "CUDA Complier Found")
 else()
     message(STATUS "No CUDA compiler found")
 endif()
